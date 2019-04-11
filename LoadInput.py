@@ -1,13 +1,62 @@
 import csv
 
-with open('data/movies.csv') as csv_file:
-    csv_reader = csv.reader(csv_file, delimiter=',')
-    line_count = 0
-    for row in csv_reader:
-        if line_count == 0:
-            print(f'Column names are {", ".join(row)}')
-            line_count += 1
-        else:
-            print(f'\tID: {row[0]}, {row[1]} is in following genres: {row[2]}')
-            line_count += 1
-    print(f'Processed {line_count} lines.')
+# function to print part of database
+def PrintDatabase(database, howManyUsersToPrint):
+    cnt = 0
+    for user in database:
+        if cnt >= howManyUsersToPrint:
+            break;
+        cnt += 1
+        print(f"User with Id: {user}")
+        for k, v in database[user].items():
+            print(f"    Movie id: {k:6} was rated: {v:2}")
+
+def PrintLinks(links, howManyLinksToPrint):
+    cnt = 0
+    for k in links:
+        if cnt >= howManyLinksToPrint:
+            break;
+        cnt += 1
+
+        print(f"Name of movie with Id: {k} is {links[k][0]:30}, tags: ", end="")
+        for t in links[k][1]:
+            print(f"{t} ", end="")
+        print()
+
+
+def LoadDatabase():
+    with open('./data/ratings.csv', mode='r') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        line_count = 0
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+                database = {int(row['userId']): {row['movieId']: float(row['rating'])}}
+
+            # add users and user
+            if int(row['userId']) in database:
+                database[int(row['userId'])][row['movieId']] = float(row['rating'])
+            else:
+                database[int(row['userId'])] = {row['movieId']: float(row['rating'])}
+
+    return database
+
+def LoadLinks():
+    with open('./data/movies.csv', mode='r', encoding="utf8") as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+
+        line_count = 0
+
+        for row in csv_reader:
+            if line_count == 0:
+                line_count += 1
+
+                links = {row['movieId']: (row['title'], row['genres'].split('|'))}
+
+            links[row['movieId']] = (row['title'], row['genres'].split('|'))
+
+    return links
+
+def MapMovieNamesOnId():
+    # TODO
+    ...
