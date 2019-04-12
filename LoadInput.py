@@ -11,6 +11,7 @@ def PrintDatabase(database, howManyUsersToPrint):
         for k, v in database[user].items():
             print(f"    Movie id: {k:6} was rated: {v:2}")
 
+# print part of mapping od Id's to movie names
 def PrintLinks(links, howManyLinksToPrint):
     cnt = 0
     for k in links:
@@ -23,7 +24,7 @@ def PrintLinks(links, howManyLinksToPrint):
             print(f"{t} ", end="")
         print()
 
-
+# load all data in structure dict(userId, dict(movieId, rating)) and return it
 def LoadDatabase():
     with open('./data/ratings.csv', mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
@@ -57,6 +58,4 @@ def LoadLinks():
 
     return links
 
-def MapMovieNamesOnId():
-    # TODO
-    ...
+

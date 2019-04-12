@@ -9,11 +9,8 @@ def main():
     # links = LoadInput.LoadLinks()
     # LoadInput.PrintLinks(links, 3)
 
-    Algorithm.findUsersWithSameMoviesRated(database, 1)
-    # Algorithm.findUsersWithSameMoviesRated(database, 2)
-    # Algorithm.findUsersWithSameMoviesRated(database, 3)
-    # Algorithm.findUsersWithSameMoviesRated(database, 4)
-    # Algorithm.findUsersWithSameMoviesRated(database, 5)
+    result = Algorithm.FindUsersWithSameMoviesRated(database, 1)
+    Algorithm.PrintUsersWithSameRatedMovies(result)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,14 @@
-def findUsersWithSameMoviesRated(database, userId):
+
+def PrintUsersWithSameRatedMovies(result):
+    for k in result:
+        if result[k] >= 2:
+            print(f"UserId: {k}, number of same rated movies: {result[k]}")
+
+    print(f"\nTotal number of users with at least one same movie rated: {len(result)}")
+    print()
+
+
+def FindUsersWithSameMoviesRated(database, userId):
     # dict with similarities
     result = {}
 
@@ -7,20 +17,21 @@ def findUsersWithSameMoviesRated(database, userId):
         if user == userId:
             continue
 
-        # print(user)
-
         for k in database[user]:
-            # print("   " + k)
-            # for k1 in database[userId]:
             if k in database[userId]:
-                # if k == k1:
                 if user in result:
                     result[user] += 1
                 else:
                     result[user] = 1
 
-    for k in result:
-        # print(f"{k} a {result[k]}")
-        if result[k] >= 2:
-            print(f"{k} a {result[k]}")
-    # print(result)
+    return result
+
+def MapMovieNamesOnId():
+    # TODO
+    ...
+
+
+def FindBestMovieOverall():
+    #required high ratin
+    # TODO
+    ...
