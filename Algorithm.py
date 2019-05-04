@@ -26,23 +26,55 @@ def find_users_with_same_movies_rated(database, user_id):
 
     return result
 
-
-def map_movie_name_on_id():
+# FIRST SCENARIO
+def spearman_similarity():
+    """finds spearmen sim. between two users that have at least some same rated movies (threshold will be given)"""
     # TODO
-    ...
 
 
-def find_best_rated_movie_overall():
-    # required high rating
+def most_similar_users():
+    """finds most similar users based on results from spearman_similarity() and cut of irrelevant users
+    (on some threshold)"""
     # TODO
-    ...
 
 
+def movies_to_recommend():
+    """find movies that relevant neighbours rated but user didnt (at least some of them not every movie must have
+    been seen by all neighbours, but those that were have higher priority, simply - relevance =
+    for every neighbour that rated specific movie: relevance(of this specific movie) += neighbour_weight"""
+    # TODO
+
+
+def recommended_movies():
+    """from movies_to_recommend() find those movies that satisfy threshold (rating 3.5), those will be recommended,
+    influence of rating from every neighbour is weighted by his relevance"""
+    # TODO
+
+
+# SECOND SCENARIO
+    # function from first scenario will suffice(if written properly)
+    # in case we find relevant neighbours but they dont have any relevant same rated movies, we simply choose
+    # best rated movies of closest neighbour(or more of them) with best ratings (mby this will be already
+    # covered in first SCENARIO
+
+# THIRD SCENARIO
 def find_user_most_favourite_genre():
     # TODO
     ...
 
 
 def find_most_favourite_movies_in_genre():
+    # TODO
+    ...
+
+
+# FOURTH SCENARIO
+def find_best_rated_movie_overall():
+    # required high rating
+    # TODO
+    ...
+
+
+def map_movie_name_on_id():
     # TODO
     ...
