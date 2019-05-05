@@ -47,6 +47,7 @@ def load_database():
 
 
 def load_links():
+    """load links to connect movieId's with real movie names"""
     with open('./data/movies.csv', mode='r', encoding="utf8") as csv_file:
         csv_reader = csv.DictReader(csv_file)
 
