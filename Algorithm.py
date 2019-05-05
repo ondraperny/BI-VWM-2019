@@ -2,15 +2,18 @@ class Recommendation:
     def __init__(self, user, database):
         self.user = user
         self.database = database
+        # key = neighbours are users that will be used to recommend movie to main user
+        # value = relevance of given neighbour
+        self.neighbours = {}
 
     def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
         ...
 
     def print_users_with_same_movies_rated(self, result):
-        for k in result:
-            if result[k] >= 2:
-                print(f"UserId: {k}, number of same rated movies: {result[k]}")
+        for key, value in result.items():
+            if value >= 2:
+                print(f"UserId: {key}, number of same rated movies: {value}")
 
         print(f"\nTotal number of users with at least one same movie rated: {len(result)}")
         print()
@@ -32,13 +35,14 @@ class Recommendation:
                     else:
                         result[user] = 1
 
+        self.neighbours = result
         return result
 
     # FIRST SCENARIO
     def candidate_neightbours(self):
         """choose neighbours with most same movies rated(with some maximum threshold of chosen neighbours), and filter
         out those whole number of same rated movies is very low, so not relevant"""
-        ...
+        candidates_amount = len(self.neighbours)
 
     def spearman_similarity(self):
         """finds spearmen sim. between two users that have at least some same rated movies"""

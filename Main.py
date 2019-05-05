@@ -13,6 +13,7 @@ def main():
 
     result = recommend.find_users_with_same_movies_rated(database, 1)
     recommend.print_users_with_same_movies_rated(result)
+    print(type(result))
 
 
 if __name__ == "__main__":
