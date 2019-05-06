@@ -16,8 +16,9 @@ def main():
 
     userA, userB = recommend.common_rated_movies(3)
 
-    recommend.print_common_rated_movies()
+    # recommend.print_common_rated_movies()
     recommend.rank_x_and_y()
+    recommend.d_squared()
 
 if __name__ == "__main__":
     main()

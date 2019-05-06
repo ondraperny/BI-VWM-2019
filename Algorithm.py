@@ -14,11 +14,19 @@ class Recommendation:
         self.main_user_dict = OrderedDict()
         self.other_user_dict = OrderedDict()
 
+        self.rank_x_dict = OrderedDict()
+        self.rank_y_dict = OrderedDict()
+
+        self.d_squared_vector = []
+        # n for spearman formula
+        self.current_n = 0
+
 
     def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
         ...
 
+    @staticmethod
     def print_users_with_same_movies_rated(self, result):
         for key, value in result.items():
             if value >= 2:
@@ -50,7 +58,7 @@ class Recommendation:
     def print_common_rated_movies(self):
         print('Main user            Other user')
         for keys in zip(self.main_user_dict, self.other_user_dict):
-           print(keys[0], self.main_user_dict[keys[0]], keys[1], self.other_user_dict[keys[0]])
+            print(keys[0], self.main_user_dict[keys[0]], keys[1], self.other_user_dict[keys[0]])
 
     def common_rated_movies(self, other_user):
         """return two dictionaries with movieId and its rating for given user"""
@@ -63,11 +71,12 @@ class Recommendation:
         return self.main_user_dict, self.other_user_dict
 
     def rank_x_and_y(self):
-        rank_x_dict = self.main_user_dict.copy()
-        rank_y_dict = self.other_user_dict.copy()
+        """calculate rank vectors x and y for spearman formula"""
+        self.rank_x_dict = self.main_user_dict.copy()
+        self.rank_y_dict = self.other_user_dict.copy()
 
         n_main = 0
-        n_othr = 0
+        n_other = 0
         for rating in self._ratings:
             rating_main = 0
             rating_othr = 0
@@ -78,20 +87,31 @@ class Recommendation:
                     rating_othr += 1
 
             x_value = float(((n_main+1) + (n_main+rating_main))/2)
-            y_value = float(((n_othr+1) + (n_othr+rating_othr))/2)
+            y_value = float(((n_other+1) + (n_other+rating_othr))/2)
 
             n_main += rating_main
-            n_othr += rating_othr
+            n_other += rating_othr
 
             for keys in zip(self.main_user_dict, self.other_user_dict):
                 if rating == self.main_user_dict[keys[0]]:
-                    rank_x_dict[keys[0]] = x_value
+                    self.rank_x_dict[keys[0]] = x_value
                 if rating == self.other_user_dict[keys[0]]:
-                    rank_y_dict[keys[0]] = y_value
+                    self.rank_y_dict[keys[0]] = y_value
 
-        print()
-        for keys in zip(rank_x_dict, rank_y_dict):
-           print(keys[0], rank_x_dict[keys[0]], keys[1], rank_y_dict[keys[0]])
+            self.current_n = n_main
+
+        # print()
+        # for keys in zip(self.rank_x_dict, self.rank_y_dict):
+        #    print(keys[0], self.rank_x_dict[keys[0]], keys[1], self.rank_y_dict[keys[0]])
+
+    def d_squared(self):
+        """calculate d squared vector for spearman formula"""
+        for (key1, value1), (key2, value2) in zip(self.rank_x_dict.items(), self.rank_y_dict.items()):
+            self.d_squared_vector.append((float(value1) - float(value2))**2)
+
+        # print(self.d_squared_vector)
+
+
 
     # FIRST SCENARIO
     def candidate_neightbours(self):
@@ -101,11 +121,12 @@ class Recommendation:
         candidates_amount = len(self.neighbours)
 
     def spearman_similarity(self):
-        """finds spearmen sim. between two users that have at least some same rated movies, where first user is main
+        """finds spearman sim. between two users that have at least some same rated movies, where first user is main
         user and second is iterated from neighbours"""
+        spearman_evaluation = self.neighbours.copy()
         for key, value in self.neighbours.items():
-            # TODO
-            ...
+            p = 1 - ((6 * sum(self.d_squared_vector)) / (self.current_n * ((self.current_n ** 2) - 1)))
+            print(p)
 
     def most_similar_users(self):
         """finds most similar users based on results from spearman_similarity() and cut of irrelevant users
