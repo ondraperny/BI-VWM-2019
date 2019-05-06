@@ -9,18 +9,30 @@ class Recommendation:
         self.database = database
         # key = neighbours are users that will be used to recommend movie to main user
         # value = relevance of given neighbour
-        self.neighbours = {}
+        # self.neighbours = {}
 
-        self.main_user_dict = OrderedDict()
-        self.other_user_dict = OrderedDict()
+        # self.main_user_dict = OrderedDict()
+        # self.other_user_dict = OrderedDict()
 
-        self.rank_x_dict = OrderedDict()
-        self.rank_y_dict = OrderedDict()
+        # self.rank_x_dict = OrderedDict()
+        # self.rank_y_dict = OrderedDict()
 
-        self.d_squared_vector = []
+        # self.d_squared_vector = []
         # n for spearman formula
-        self.current_n = 0
+        # self.current_n = 0
 
+    def tmp_wrapper(self):
+        neighbours = self.find_users_with_same_movies_rated()
+
+        main_user_dict, other_user_dict = self.common_rated_movies(3)
+        self.print_common_rated_movies(main_user_dict, other_user_dict)
+
+        n_main, rank_x_dict, rank_y_dict = self.rank_x_and_y(main_user_dict, other_user_dict)
+        self.print_common_rated_movies(rank_x_dict, rank_y_dict)
+
+        d_squared_vector = self.d_squared(rank_x_dict, rank_y_dict)
+        print(d_squared_vector)
+        self.spearman_similarity(n_main, d_squared_vector, neighbours)
 
     def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
@@ -52,38 +64,39 @@ class Recommendation:
                     else:
                         result[user] = 1
 
-        self.neighbours = result
         return result
 
-    def print_common_rated_movies(self):
+    def print_common_rated_movies(self, main_user_dict, other_user_dict):
         print('Main user            Other user')
-        for keys in zip(self.main_user_dict, self.other_user_dict):
-            print(keys[0], self.main_user_dict[keys[0]], keys[1], self.other_user_dict[keys[0]])
+        for keys in zip(main_user_dict, other_user_dict):
+            print(keys[0], main_user_dict[keys[0]], keys[1], other_user_dict[keys[0]])
 
     def common_rated_movies(self, other_user):
         """return two dictionaries with movieId and its rating for given user"""
+        main_user_dict = OrderedDict()
+        other_user_dict = OrderedDict()
 
         for movie in self.database[other_user]:
             if movie in self.database[self.main_user]:
-                self.main_user_dict[movie] = self.database[self.main_user][movie]
-                self.other_user_dict[movie] = self.database[other_user][movie]
+                main_user_dict[movie] = self.database[self.main_user][movie]
+                other_user_dict[movie] = self.database[other_user][movie]
 
-        return self.main_user_dict, self.other_user_dict
+        return main_user_dict, other_user_dict
 
-    def rank_x_and_y(self):
+    def rank_x_and_y(self, main_user_dict, other_user_dict):
         """calculate rank vectors x and y for spearman formula"""
-        self.rank_x_dict = self.main_user_dict.copy()
-        self.rank_y_dict = self.other_user_dict.copy()
+        rank_x_dict = main_user_dict.copy()
+        rank_y_dict = other_user_dict.copy()
 
         n_main = 0
         n_other = 0
         for rating in self._ratings:
             rating_main = 0
             rating_othr = 0
-            for keys in zip(self.main_user_dict, self.other_user_dict):
-                if rating == self.main_user_dict[keys[0]]:
+            for keys in zip(main_user_dict, other_user_dict):
+                if rating == main_user_dict[keys[0]]:
                     rating_main += 1
-                if rating == self.other_user_dict[keys[0]]:
+                if rating == other_user_dict[keys[0]]:
                     rating_othr += 1
 
             x_value = float(((n_main+1) + (n_main+rating_main))/2)
@@ -92,41 +105,41 @@ class Recommendation:
             n_main += rating_main
             n_other += rating_othr
 
-            for keys in zip(self.main_user_dict, self.other_user_dict):
-                if rating == self.main_user_dict[keys[0]]:
-                    self.rank_x_dict[keys[0]] = x_value
-                if rating == self.other_user_dict[keys[0]]:
-                    self.rank_y_dict[keys[0]] = y_value
-
-            self.current_n = n_main
+            for keys in zip(main_user_dict, other_user_dict):
+                if rating == main_user_dict[keys[0]]:
+                    rank_x_dict[keys[0]] = x_value
+                if rating == other_user_dict[keys[0]]:
+                    rank_y_dict[keys[0]] = y_value
 
         # print()
-        # for keys in zip(self.rank_x_dict, self.rank_y_dict):
-        #    print(keys[0], self.rank_x_dict[keys[0]], keys[1], self.rank_y_dict[keys[0]])
+        # for keys in zip(rank_x_dict, rank_y_dict):
+        #    print(keys[0], rank_x_dict[keys[0]], keys[1], rank_y_dict[keys[0]])
+        return n_main, rank_x_dict, rank_y_dict
 
-    def d_squared(self):
+    def d_squared(self, rank_x_dict, rank_y_dict):
         """calculate d squared vector for spearman formula"""
-        for (key1, value1), (key2, value2) in zip(self.rank_x_dict.items(), self.rank_y_dict.items()):
-            self.d_squared_vector.append((float(value1) - float(value2))**2)
+        d_squared_vector = []
 
-        # print(self.d_squared_vector)
+        for (key1, value1), (key2, value2) in zip(rank_x_dict.items(), rank_y_dict.items()):
+            d_squared_vector.append((float(value1) - float(value2))**2)
 
-
+        # print(d_squared_vector)
+        return d_squared_vector
 
     # FIRST SCENARIO
-    def candidate_neightbours(self):
+    def candidate_neightbours(self, neighbours):
         """choose neighbours with most same movies rated(with some maximum threshold of chosen neighbours), and filter
         out those whole number of same rated movies is very low, so not relevant"""
         # TODO optimalizace odstraneni nerelevantnich sousedu
-        candidates_amount = len(self.neighbours)
+        candidates_amount = len(neighbours)
 
-    def spearman_similarity(self):
+    def spearman_similarity(self, current_n, d_squared_vector, neighbours):
         """finds spearman sim. between two users that have at least some same rated movies, where first user is main
         user and second is iterated from neighbours"""
-        spearman_evaluation = self.neighbours.copy()
-        for key, value in self.neighbours.items():
-            p = 1 - ((6 * sum(self.d_squared_vector)) / (self.current_n * ((self.current_n ** 2) - 1)))
-            print(p)
+        spearman_evaluation = neighbours.copy()
+        for key, value in neighbours.items():
+            p = 1 - ((6 * sum(d_squared_vector)) / (current_n * ((current_n ** 2) - 1)))
+            # print(p)
 
     def most_similar_users(self):
         """finds most similar users based on results from spearman_similarity() and cut of irrelevant users
