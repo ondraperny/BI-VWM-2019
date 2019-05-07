@@ -249,8 +249,13 @@ class Recommendation:
                 weighted_denominator += closest_neighbours[user]
 
             coefficient = coefficient / weighted_denominator
-            print("Movie:", movie, "coefficient: ", coefficient)
-        print(len(movie_list_users_dict))
+            movie_to_recommend_dict[movie] = coefficient
+
+        movie_to_recommend_dict = OrderedDict(sorted(movie_to_recommend_dict.items(), key=lambda x: x[1], reverse=True))
+        for movie, coefficient in movie_to_recommend_dict.items():
+            print("Movie: %8s" % movie, "coefficient: %8.5f" % coefficient, "quantity: %3s" % len(movie_list_users_dict[movie]))
+
+        # print(movie_list_users_dict)
 
     # SECOND SCENARIO
     # function from first scenario will suffice(if written properly)

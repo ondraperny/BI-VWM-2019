@@ -4,7 +4,9 @@ import Algorithm
 
 def main():
     # TODO
-    database = LoadInput.load_database()
+
+    io = LoadInput.IOClass()
+    database = io.load_database()
     recommend = Algorithm.Recommendation(3, database)
     # LoadInput.print_database(database, 3)
 
