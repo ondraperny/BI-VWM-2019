@@ -1,5 +1,7 @@
+from tempfile import NamedTemporaryFile
+import shutil
 import csv
-
+import os
 
 class IOClass:
     @staticmethod
@@ -62,3 +64,31 @@ class IOClass:
 
                 links[row['movieId']] = (row['title'], row['genres'].split('|'))
         return links
+
+    def update_rating(self, userId, movieId, newRating):
+        # TODO checkovat jestli tam uz neni kdyz ho chci pridat
+        filename = './data/test.csv'
+        tempfile = NamedTemporaryFile(mode='w', delete=False)
+
+        fields = ['userId', 'movieId', 'rating', 'timestamp']
+
+        with open(filename, 'r') as csvfile, tempfile:
+            reader = csv.DictReader(csvfile, fieldnames=fields)
+            writer = csv.DictWriter(tempfile, fieldnames=fields)
+            for row in reader:
+                if row['userId'] == str(userId) and row['movieId'] == str(movieId):
+                    print('updating row', row['rating'])
+                    row['rating'] = str(newRating)
+                row = {'userId': row['userId'], 'movieId': row['movieId'], 'rating': row['rating'], 'timestamp': row['timestamp']}
+                writer.writerow(row)
+
+        shutil.move(tempfile.name, filename)
+
+    def add_new_rating(self, userId, movieId, movieRating):
+        row = [userId, movieId, movieRating, 0]
+
+        with open('./data/test.csv', 'a') as csvFile:
+            writer = csv.writer(csvFile, lineterminator=os.linesep)
+            writer.writerow(row)
+
+        csvFile.close()
