@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 
 class Recommendation:
+    """class containing all methods used for recommending"""
     _ratings = (5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0)
     # _ratings = (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)
 
@@ -42,9 +43,10 @@ class Recommendation:
         # print("Spearman:", p, '\n')
 
         res = self.spearman_similarity()
-        res, res1 = self.most_similar_users(res)
-        print(len(res) + len(res1))
-        self.movies_to_recommend(res, res1)
+        closest_neighbours, distance_neighbours = self.most_similar_users(res)
+        print(len(closest_neighbours) + len(distance_neighbours))
+        quantity_dict, movie_list_users_dict = self.movies_to_recommend(closest_neighbours, distance_neighbours)
+        self.recommended_movies(quantity_dict, movie_list_users_dict, closest_neighbours)
         # print(res)
 
     def final_recommendation(self):
@@ -198,13 +200,14 @@ class Recommendation:
         print(closest_neighbours)
         print(distance_neighbours)
 
+        # key = user, value = his relevance to main user
         return closest_neighbours, distance_neighbours
 
     def movies_to_recommend(self, closest_neighbours, distance_neighbours):
         """find movies that relevant neighbours rated but user didnt (at least some of them not every movie must have
         been seen by all neighbours, but those that were have higher priority, simply - relevance =
         for every neighbour that rated specific movie: relevance(of this specific movie) += neighbour_weight"""
-        closest_neighbours.update(distance_neighbours)
+        # closest_neighbours.update(distance_neighbours)
 
         quantity_dict = OrderedDict()
         movie_list_users_dict = {}
@@ -222,6 +225,7 @@ class Recommendation:
             quantity_dict.pop(movie, None)
 
         threshold = 3
+
         quantity_dict = {key:value for key, value in quantity_dict.items() if value > threshold}
         # quantity_dict = OrderedDict(sorted(quantity_dict.items(), key=lambda x: x[1], reverse=True))
 
@@ -229,12 +233,24 @@ class Recommendation:
 
         print(movie_list_users_dict)
         print(quantity_dict)
+
         return quantity_dict, movie_list_users_dict
 
-    def recommended_movies(self):
+    def recommended_movies(self, quantity_dict, movie_list_users_dict, closest_neighbours):
         """from movies_to_recommend() find those movies that satisfy threshold (rating 3.5), those will be recommended,
         influence of rating from every neighbour is weighted by his relevance"""
-        # TODO
+        movie_to_recommend_dict = OrderedDict()
+
+        for movie, users in movie_list_users_dict.items():
+            weighted_denominator = 0
+            coefficient = 0
+            for user in users:
+                coefficient += self.database[user][movie] * closest_neighbours[user]
+                weighted_denominator += closest_neighbours[user]
+
+            coefficient = coefficient / weighted_denominator
+            print("Movie:", movie, "coefficient: ", coefficient)
+        print(len(movie_list_users_dict))
 
     # SECOND SCENARIO
     # function from first scenario will suffice(if written properly)
@@ -264,3 +280,5 @@ class Recommendation:
 # administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same, pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
 
 # fce add_user a change_user
+
+# print users rating

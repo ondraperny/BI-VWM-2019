@@ -5,7 +5,7 @@ import Algorithm
 def main():
     # TODO
     database = LoadInput.load_database()
-    recommend = Algorithm.Recommendation(1, database)
+    recommend = Algorithm.Recommendation(3, database)
     # LoadInput.print_database(database, 3)
 
     # links = LoadInput.load_links()
