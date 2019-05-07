@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 class Recommendation:
     _ratings = (5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0)
+    # _ratings = (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)
 
     def __init__(self, user, database):
         self.main_user = user
@@ -22,27 +23,38 @@ class Recommendation:
         # self.current_n = 0
 
     def tmp_wrapper(self):
-        neighbours = self.find_users_with_same_movies_rated()
+        # neigh = self.find_users_with_same_movies_rated()
+        # self.print_users_with_same_movies_rated(neigh)
 
-        main_user_dict, other_user_dict = self.common_rated_movies(3)
-        self.print_common_rated_movies(main_user_dict, other_user_dict)
+        # key = 85
+        # print("User:", key)
+        # main_user_dict, other_user_dict = self.common_rated_movies(key)
+        #
+        # self.print_common_rated_movies(main_user_dict, other_user_dict)
+        #
+        # n_main, rank_x_dict, rank_y_dict = self.rank_x_and_y(main_user_dict, other_user_dict)
+        # self.print_common_rated_movies(rank_x_dict, rank_y_dict)
+        #
+        # d_squared_vector = self.d_squared(rank_x_dict, rank_y_dict)
+        # current_n = len(rank_x_dict)
+        #
+        # p = 1 - ((6 * sum(d_squared_vector)) / (current_n * ((current_n ** 2) - 1)))
+        # print("Spearman:", p, '\n')
 
-        n_main, rank_x_dict, rank_y_dict = self.rank_x_and_y(main_user_dict, other_user_dict)
-        self.print_common_rated_movies(rank_x_dict, rank_y_dict)
-
-        d_squared_vector = self.d_squared(rank_x_dict, rank_y_dict)
-        print(d_squared_vector)
-        self.spearman_similarity(n_main, d_squared_vector, neighbours)
+        res = self.spearman_similarity()
+        res, res1 = self.most_similar_users(res)
+        print(len(res) + len(res1))
+        self.movies_to_recommend(res, res1)
+        # print(res)
 
     def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
         ...
 
     @staticmethod
-    def print_users_with_same_movies_rated(self, result):
+    def print_users_with_same_movies_rated(result):
         for key, value in result.items():
-            if value >= 2:
-                print(f"UserId: {key}, number of same rated movies: {value}")
+            print(f"UserId: {key}, number of same rated movies: {value}")
 
         print(f"\nTotal number of users with at least one same movie rated: {len(result)}")
         print()
@@ -50,6 +62,7 @@ class Recommendation:
     def find_users_with_same_movies_rated(self):
         """find all users that have rated at least one common """
         # dict with similarities
+        # key = user, value = number of same movies rated with main user
         result = {}
 
         for user in self.database:
@@ -67,9 +80,10 @@ class Recommendation:
         return result
 
     def print_common_rated_movies(self, main_user_dict, other_user_dict):
-        print('Main user            Other user')
+        print('Movie id: | main user: | other user:')
+        print('------------------------------------')
         for keys in zip(main_user_dict, other_user_dict):
-            print(keys[0], main_user_dict[keys[0]], keys[1], other_user_dict[keys[0]])
+            print("%8s" % (keys[0]), "%10s" % main_user_dict[keys[0]], "%10s" % other_user_dict[keys[0]])
 
     def common_rated_movies(self, other_user):
         """return two dictionaries with movieId and its rating for given user"""
@@ -133,24 +147,89 @@ class Recommendation:
         # TODO optimalizace odstraneni nerelevantnich sousedu
         candidates_amount = len(neighbours)
 
-    def spearman_similarity(self, current_n, d_squared_vector, neighbours):
+        new_neighbours = {key:value for key,value in neighbours.items() if value > 2}
+        # for key, value in neighbours.items():
+        #     if value < 3:
+        #         neighbours.pop(key)
+
+        return new_neighbours
+
+    def spearman_similarity(self):
         """finds spearman sim. between two users that have at least some same rated movies, where first user is main
         user and second is iterated from neighbours"""
-        spearman_evaluation = neighbours.copy()
-        for key, value in neighbours.items():
-            p = 1 - ((6 * sum(d_squared_vector)) / (current_n * ((current_n ** 2) - 1)))
-            # print(p)
+        spearman_result = OrderedDict()
+        neighbours = self.find_users_with_same_movies_rated()
 
-    def most_similar_users(self):
+        neighbours = self.candidate_neightbours(neighbours)
+
+        # self.print_users_with_same_movies_rated(neighbours)
+        # print(neighbours)
+
+        for key, value in neighbours.items():
+            # print("User:", key, "Value: ", value)
+            main_user_dict, other_user_dict = self.common_rated_movies(key)
+
+            # self.print_common_rated_movies(main_user_dict, other_user_dict)
+
+            n_main, rank_x_dict, rank_y_dict = self.rank_x_and_y(main_user_dict, other_user_dict)
+            # self.print_common_rated_movies(rank_x_dict, rank_y_dict)
+
+            d_squared_vector = self.d_squared(rank_x_dict, rank_y_dict)
+            current_n = n_main
+            # len(rank_x_dict)
+
+            p = 1 - ((6 * sum(d_squared_vector)) / (current_n * ((current_n ** 2) - 1)))
+
+            spearman_result[key] = p
+            # print("Spearman:", p, '\n')
+        # spearman_evaluation = neighbours.copy()
+        return spearman_result
+
+    def most_similar_users(self, user_spearman_dict):
         """finds most similar users based on results from spearman_similarity() and cut of irrelevant users
         (on some threshold)"""
-        # TODO
 
-    def movies_to_recommend(self):
+        closest_neighbours = {key:value for key, value in user_spearman_dict.items() if value > 0.5}
+        distance_neighbours = {key:value for key, value in user_spearman_dict.items() if value < -0.5}
+
+        # closest_neighbours = OrderedDict(sorted(closest_neighbours.items(), key=lambda x: x[1]))
+        # distance_neighbours = OrderedDict(sorted(distance_neighbours.items(), key=lambda x: x[1]))
+
+        print(closest_neighbours)
+        print(distance_neighbours)
+
+        return closest_neighbours, distance_neighbours
+
+    def movies_to_recommend(self, closest_neighbours, distance_neighbours):
         """find movies that relevant neighbours rated but user didnt (at least some of them not every movie must have
         been seen by all neighbours, but those that were have higher priority, simply - relevance =
         for every neighbour that rated specific movie: relevance(of this specific movie) += neighbour_weight"""
-        # TODO
+        closest_neighbours.update(distance_neighbours)
+
+        quantity_dict = OrderedDict()
+        movie_list_users_dict = {}
+
+        for user in closest_neighbours:
+            for movie in self.database[user]:
+                if movie in quantity_dict:
+                    quantity_dict[movie] += 1
+                    movie_list_users_dict[movie].append(user)
+                else:
+                    quantity_dict[movie] = 1
+                    movie_list_users_dict[movie] = [user]
+
+        for movie in self.database[self.main_user]:
+            quantity_dict.pop(movie, None)
+
+        threshold = 3
+        quantity_dict = {key:value for key, value in quantity_dict.items() if value > threshold}
+        # quantity_dict = OrderedDict(sorted(quantity_dict.items(), key=lambda x: x[1], reverse=True))
+
+        movie_list_users_dict = {key:value for key, value in movie_list_users_dict.items() if len(value) > threshold}
+
+        print(movie_list_users_dict)
+        print(quantity_dict)
+        return quantity_dict, movie_list_users_dict
 
     def recommended_movies(self):
         """from movies_to_recommend() find those movies that satisfy threshold (rating 3.5), those will be recommended,
@@ -181,3 +260,7 @@ class Recommendation:
     def map_movie_name_on_id(self):
         # TODO
         ...
+
+# administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same, pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
+
+# fce add_user a change_user
