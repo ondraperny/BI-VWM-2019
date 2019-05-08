@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import LoadInput
 
 
 class Recommendation:
@@ -9,6 +10,17 @@ class Recommendation:
     def __init__(self, user, database):
         self.main_user = user
         self.database = database
+
+        self.map_movie_name_on_movie_id = OrderedDict()
+        io = LoadInput.IOClass()
+        self.map_movie_name_on_movie_id = io.load_links()
+
+        # self.print_main_user_ratings()
+        self.find_best_rated_movie_overall()
+
+        # io.print_links(self.map_movie_name_on_movie_id, 50)
+        # print(self.map_movie_name_on_movie_id)
+
         # key = neighbours are users that will be used to recommend movie to main user
         # value = relevance of given neighbour
         # self.neighbours = {}
@@ -81,7 +93,8 @@ class Recommendation:
 
         return result
 
-    def print_common_rated_movies(self, main_user_dict, other_user_dict):
+    @staticmethod
+    def print_common_rated_movies(main_user_dict, other_user_dict):
         print('Movie id: | main user: | other user:')
         print('------------------------------------')
         for keys in zip(main_user_dict, other_user_dict):
@@ -132,7 +145,8 @@ class Recommendation:
         #    print(keys[0], rank_x_dict[keys[0]], keys[1], rank_y_dict[keys[0]])
         return n_main, rank_x_dict, rank_y_dict
 
-    def d_squared(self, rank_x_dict, rank_y_dict):
+    @staticmethod
+    def d_squared(rank_x_dict, rank_y_dict):
         """calculate d squared vector for spearman formula"""
         d_squared_vector = []
 
@@ -143,7 +157,8 @@ class Recommendation:
         return d_squared_vector
 
     # FIRST SCENARIO
-    def candidate_neightbours(self, neighbours):
+    @staticmethod
+    def candidate_neightbours(neighbours):
         """choose neighbours with most same movies rated(with some maximum threshold of chosen neighbours), and filter
         out those whole number of same rated movies is very low, so not relevant"""
         # TODO optimalizace odstraneni nerelevantnich sousedu
@@ -276,14 +291,32 @@ class Recommendation:
     def find_best_rated_movie_overall(self):
         # required high rating
         # TODO
-        ...
+        result_dict = OrderedDict()
+        for _, value in self.database.items():
+            for movie, rating in value.items():
+                if movie in result_dict:
+                    result_dict[movie][0] += rating
+                    result_dict[movie][1] += 1
+                else:
+                    result_dict[movie] = [rating, 1]
+
+        # number of user that must hve rated given movie to be result valid
+        threshold = 10
+        result_dict = {key:value for key, value in result_dict.items() if value[1] > threshold}
+
+        for res in result_dict:
+            print("Average rating of", res, "is", result_dict[res][0] / result_dict[res][1], "where",
+                  result_dict[res][1], "people rated, with complete rating", result_dict[res][0])
 
     def map_movie_name_on_id(self):
         # TODO
         ...
 
+    def print_main_user_ratings(self):
+        for movie, rating in self.database[self.main_user].items():
+            print(movie, rating, self.map_movie_name_on_movie_id[movie][0])
+
 # administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same, pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
 
-# fce add_user a change_user
 
 # print users rating

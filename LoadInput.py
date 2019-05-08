@@ -3,7 +3,10 @@ import shutil
 import csv
 import os
 
+
 class IOClass:
+    """class that contains all functions that are used for IO operations with the file"""
+
     @staticmethod
     def print_database(database, how_many_users_print):
         """function to print part of database"""
@@ -65,29 +68,38 @@ class IOClass:
                 links[row['movieId']] = (row['title'], row['genres'].split('|'))
         return links
 
-    def update_rating(self, userId, movieId, newRating):
-        # TODO checkovat jestli tam uz neni kdyz ho chci pridat
-        filename = './data/test.csv'
+    @staticmethod
+    def update_rating(user_id, movie_id, new_rating):
+        filename = './data/movies.csv'
         tempfile = NamedTemporaryFile(mode='w', delete=False)
 
         fields = ['userId', 'movieId', 'rating', 'timestamp']
 
-        with open(filename, 'r') as csvfile, tempfile:
-            reader = csv.DictReader(csvfile, fieldnames=fields)
+        flag = True
+        with open(filename, 'r') as csv_file, tempfile:
+            reader = csv.DictReader(csv_file, fieldnames=fields)
             writer = csv.DictWriter(tempfile, fieldnames=fields)
             for row in reader:
-                if row['userId'] == str(userId) and row['movieId'] == str(movieId):
+                if row['userId'] == str(user_id) and row['movieId'] == str(movie_id):
+                    flag = False
                     print('updating row', row['rating'])
-                    row['rating'] = str(newRating)
-                row = {'userId': row['userId'], 'movieId': row['movieId'], 'rating': row['rating'], 'timestamp': row['timestamp']}
+                    row['rating'] = str(new_rating)
+                row = {'userId': row['userId'], 'movieId': row['movieId'], 'rating': row['rating'],
+                       'timestamp': row['timestamp']}
                 writer.writerow(row)
+
+        if flag:
+            print("Wrong userId and movieId combination - database was not changed")
 
         shutil.move(tempfile.name, filename)
 
-    def add_new_rating(self, userId, movieId, movieRating):
-        row = [userId, movieId, movieRating, 0]
+    @staticmethod
+    def add_new_rating(user_id, movie_id, new_rating):
+        # TODO checkovat jestli tam uz neni kdyz ho chci pridat
 
-        with open('./data/test.csv', 'a') as csvFile:
+        row = [user_id, movie_id, new_rating, 0]
+
+        with open('./data/movies.csv', 'a') as csvFile:
             writer = csv.writer(csvFile, lineterminator=os.linesep)
             writer.writerow(row)
 
