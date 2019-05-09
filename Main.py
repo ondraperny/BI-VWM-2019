@@ -5,13 +5,16 @@ import Algorithm
 def main():
     # TODO
 
+    # prihlaseni uzivatele bude odpovidat vytvoreni classy Recommendation pro toho daneho uzivatele
+
     io = LoadInput.IOClass()
 
     # io.update_rating(1, 1, 4)
     # io.add_new_rating(1524, 1111, 2)
 
-    database = io.load_database()
-    recommend = Algorithm.Recommendation(3, database)
+    recommend = Algorithm.Recommendation(3)
+
+    recommend.print_main_user_ratings()
 
     # # LoadInput.print_database(database, 3)
     #

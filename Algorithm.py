@@ -7,13 +7,16 @@ class Recommendation:
     _ratings = (5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0)
     # _ratings = (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)
 
-    def __init__(self, user, database):
+    def __init__(self, user):
         self.main_user = user
-        self.database = database
 
         self.map_movie_name_on_movie_id = OrderedDict()
         io = LoadInput.IOClass()
+
+
+        # dict(tuple(one-title, second-list of genres))
         self.map_movie_name_on_movie_id = io.load_links()
+        self.database = io.load_database()
 
         # self.print_main_user_ratings()
         self.find_best_rated_movie_overall()
@@ -61,9 +64,23 @@ class Recommendation:
         self.recommended_movies(quantity_dict, movie_list_users_dict, closest_neighbours)
         # print(res)
 
-    def final_recommendation(self):
+    def final_recommendation(self, actionId):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
-        ...
+        if actionId  == 0:
+            # spearman based recommendation
+            ...
+        elif actionId == 1:
+            # best in genre recommendation
+            ...
+        elif actionId == 2:
+            # best rated movie overall recommendation
+            ...
+
+        res = self.spearman_similarity()
+        closest_neighbours, distance_neighbours = self.most_similar_users(res)
+        print(len(closest_neighbours) + len(distance_neighbours))
+        quantity_dict, movie_list_users_dict = self.movies_to_recommend(closest_neighbours, distance_neighbours)
+        self.recommended_movies(quantity_dict, movie_list_users_dict, closest_neighbours)
 
     @staticmethod
     def print_users_with_same_movies_rated(result):
@@ -268,9 +285,10 @@ class Recommendation:
 
         movie_to_recommend_dict = OrderedDict(sorted(movie_to_recommend_dict.items(), key=lambda x: x[1], reverse=True))
         for movie, coefficient in movie_to_recommend_dict.items():
-            print("Movie: %8s" % movie, "coefficient: %8.5f" % coefficient, "quantity: %3s" % len(movie_list_users_dict[movie]))
+            print("Movie: %8s" % movie, "coefficient: %8.5f" % coefficient,
+                  "quantity: %3s" % len(movie_list_users_dict[movie]))
 
-        # print(movie_list_users_dict)
+        return movie_to_recommend_dict
 
     # SECOND SCENARIO
     # function from first scenario will suffice(if written properly)
@@ -281,6 +299,8 @@ class Recommendation:
     # THIRD SCENARIO
     def find_user_most_favourite_genre(self):
         # TODO
+        for movie, rating in self.database[self.main_user]:
+
         ...
 
     def find_most_favourite_movies_in_genre(self):
@@ -303,18 +323,26 @@ class Recommendation:
         # number of user that must hve rated given movie to be result valid
         threshold = 10
         result_dict = {key:value for key, value in result_dict.items() if value[1] > threshold}
+        result_dict = OrderedDict(sorted(result_dict.items(), key=lambda x: x[1], reverse=True))
 
         for res in result_dict:
             print("Average rating of", res, "is", result_dict[res][0] / result_dict[res][1], "where",
                   result_dict[res][1], "people rated, with complete rating", result_dict[res][0])
+        return result_dict
 
-    def map_movie_name_on_id(self):
+    def map_movie_name_on_id(self, dict):
+        # dict input is dict with movieId and its value rating
         # TODO
         ...
 
     def print_main_user_ratings(self):
+        user_ratings = []
         for movie, rating in self.database[self.main_user].items():
             print(movie, rating, self.map_movie_name_on_movie_id[movie][0])
+            user_ratings.append([movie, rating, self.map_movie_name_on_movie_id[movie][0]])
+
+        # return list(list()), where in inner lists are 0 movieId, 1 movieRating, 2 movieName
+        return user_ratings
 
 # administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same, pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
 
