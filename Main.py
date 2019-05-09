@@ -16,12 +16,16 @@ def main():
 
     recommend.print_main_user_ratings()
 
-    # # LoadInput.print_database(database, 3)
-    #
-    # # links = LoadInput.load_links()
-    # # LoadInput.print_links(links, 3)
-    #
-    # recommend.tmp_wrapper()
+    # recommend.add_genre(genre) prida zanr
+    # recommend.final_recommendation(actionId)
+    # TODO domyslet actionId parametr
+    # actionId == 0 ... spearman, actionId == 1 ... vyhledani nejlepsiho filmu v zanru, actionId == 2 vyhledani globalne nejlepsi film
+
+    # io.update_rating(user_id, movie_id, new_rating)
+    # kdyz vrati False, update se nepovedl
+
+    # io.add_new_rating(user_id, movie_id, new_rating)
+    # kdyz vrati False, pridani se nepovedlo
 
 
 if __name__ == "__main__":
