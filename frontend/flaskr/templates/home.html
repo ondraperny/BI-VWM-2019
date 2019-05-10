@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+    <title>Flaskr</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+        <style>
+        h1 {
+            margin: 10px;
+        }
+
+        h2 {
+            margin: 5px;
+        }
+
+    </style>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('profile') }}">Profile</a></li>
+            <li><a href="{{ url_for('recommend') }}">Recommend me</a></li>
+        </ul>
+    </nav>
+
+
+    <h1>Home</h1>
+</body>
+</html>
