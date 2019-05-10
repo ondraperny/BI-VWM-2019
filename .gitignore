@@ -84,4 +84,20 @@ fabric.properties
 # Sonarlint plugin
 .idea/sonarlint
 
+# ignored files for frontend/flask
+venv/
+*.pyc
+__pycache__/
+instance/
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+.idea/
+*.swp
+*~
+
 # End of https://www.gitignore.io/api/pycharm
