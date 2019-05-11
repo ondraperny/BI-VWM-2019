@@ -8,13 +8,23 @@ class Recommendation:
     # _ratings = (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)
 
     def __init__(self, user):
+        # print in console semi-calculations during recommending
         self.flag_print_in_console = True
+        # cut of users with smaller spearman_coeffiecient(than this given) as irrelevant
+        self.spearman_coefficient = 0.5
+        # minimal amount of movies that rated both main_user and other_user
+        self.min_same_rated_movies = 2
+        # minimal amount of users that must have rated specific movie, so the movie can be recommended
+        self.threshold_number_of_evaluators = 3
+        # minimal amount of users that must have rated specific movie, so the movie can be recommended when recommending
+        # from global best movies (not user specific)
+        self.threshold_number_of_evaluators_global = 10
+
         self.main_user = user
 
-        self.map_movie_name_on_movie_id = OrderedDict()
         io = LoadInput.IOClass()
-
         # dict(tuple(one-title, second-list of genres))
+        self.map_movie_name_on_movie_id = OrderedDict()
         self.map_movie_name_on_movie_id = io.load_links()
         self.database = io.load_database()
 
@@ -24,9 +34,8 @@ class Recommendation:
         if actionId  == 0:
             res = self.spearman_similarity()
             closest_neighbours, distance_neighbours = self.most_similar_users(res)
-            print(len(closest_neighbours) + len(distance_neighbours))
-            quantity_dict, movie_list_users_dict = self.movies_to_recommend(closest_neighbours, distance_neighbours)
-            res = self.recommended_movies(quantity_dict, movie_list_users_dict, closest_neighbours)
+            movie_list_users_dict = self.movies_to_recommend(closest_neighbours, distance_neighbours)
+            res = self.recommended_movies(movie_list_users_dict, closest_neighbours)
         elif actionId == 1:
             # best in genre recommendation
             ...
@@ -137,20 +146,18 @@ class Recommendation:
             print('Movie id: | main user: ')
             print('-----------------------')
             for index, (key, d_value) in enumerate(zip(rank_x_dict, d_squared_vector)):
-                print("%8s" % key, "%10s" % d_squared_vector[index])
+                print("%8s" % key, "%10.5f" % d_squared_vector[index])
 
         # list(d_squared_values)
         return d_squared_vector
 
     # TODO
-    @staticmethod
-    def candidate_neightbours(neighbours):
+    def candidate_neightbours(self, neighbours):
         """choose neighbours with most same movies rated(with some maximum threshold of chosen neighbours), and filter
         out those whole number of same rated movies is very low, so not relevant"""
         # TODO optimalizace odstraneni nerelevantnich sousedu
-        candidates_amount = len(neighbours)
 
-        new_neighbours = {key:value for key,value in neighbours.items() if value > 2}
+        new_neighbours = {key:value for key,value in neighbours.items() if value > self.min_same_rated_movies}
         # for key, value in neighbours.items():
         #     if value < 3:
         #         neighbours.pop(key)
@@ -161,60 +168,51 @@ class Recommendation:
         """finds spearman sim. between two users that have at least some same rated movies, where first user is main
         user and second is iterated from neighbours"""
         spearman_result = OrderedDict()
+        # get all users that have at least "self.min_same_rated_movies"
         neighbours = self.users_with_same_movies_rated()
-
         neighbours = self.candidate_neightbours(neighbours)
 
-        # self.print_users_with_same_movies_rated(neighbours)
-        # print(neighbours)
-
         for key, value in neighbours.items():
-            # print("User:", key, "Value: ", value)
             main_user_dict, other_user_dict = self.common_rated_movies(key)
-
-            # self.print_common_rated_movies(main_user_dict, other_user_dict)
-
             rank_x_dict, rank_y_dict = self.rank_x_and_y(main_user_dict, other_user_dict)
-            # self.print_common_rated_movies(rank_x_dict, rank_y_dict)
 
             d_squared_vector = self.d_squared(rank_x_dict, rank_y_dict)
             current_n = len(rank_x_dict)
-            # len(rank_x_dict)
+
             # spearman formula
             p = 1 - ((6 * sum(d_squared_vector)) / (current_n * ((current_n ** 2) - 1)))
-
             spearman_result[key] = p
-            # print("Spearman:", p, '\n')
-        # spearman_evaluation = neighbours.copy()
+
         if self.flag_print_in_console:
             print('Movie id: | main user: ')
             print('-----------------------')
             for key, value in spearman_result.items():
-                print("%8s" % key, "%10s" % value)
+                print("%8s" % key, "%10.5f" % value)
 
         return spearman_result
 
     def most_similar_users(self, user_spearman_dict):
         """finds most similar users based on results from spearman_similarity() and cut of irrelevant users
-        (on some threshold)"""
+         on threshold"""
 
-        closest_neighbours = {key:value for key, value in user_spearman_dict.items() if value > 0.5}
-        distance_neighbours = {key:value for key, value in user_spearman_dict.items() if value < -0.5}
+        closest_neighbours = {key: value for key, value in user_spearman_dict.items()
+                              if value > self.spearman_coefficient}
+        distant_neighbours = {key: value for key, value in user_spearman_dict.items()
+                              if value < (-1 * self.spearman_coefficient)}
 
-        # closest_neighbours = OrderedDict(sorted(closest_neighbours.items(), key=lambda x: x[1]))
-        # distance_neighbours = OrderedDict(sorted(distance_neighbours.items(), key=lambda x: x[1]))
-
+        if self.flag_print_in_console:
+            print('Movie id: | main user: ')
+            print('-----------------------')
+            for key, value in closest_neighbours.items():
+                print("%8s" % key, "%10.5f" % value)
         print(closest_neighbours)
-        print(distance_neighbours)
+        print(distant_neighbours)
 
-        # key = user, value = his relevance to main user
-        return closest_neighbours, distance_neighbours
+        # dict(user : his relevance to main user)
+        return closest_neighbours, distant_neighbours
 
-    def movies_to_recommend(self, closest_neighbours, distance_neighbours):
-        """find movies that relevant neighbours rated but user didnt (at least some of them not every movie must have
-        been seen by all neighbours, but those that were have higher priority, simply - relevance =
-        for every neighbour that rated specific movie: relevance(of this specific movie) += neighbour_weight"""
-        # closest_neighbours.update(distance_neighbours)
+    def movies_to_recommend(self, closest_neighbours, distant_neighbours):
+        """find all users """
 
         quantity_dict = OrderedDict()
         movie_list_users_dict = {}
@@ -231,19 +229,20 @@ class Recommendation:
         for movie in self.database[self.main_user]:
             quantity_dict.pop(movie, None)
 
-        threshold = 3
+        movie_list_users_dict = {key: value for key, value in movie_list_users_dict.items()
+                                 if len(value) > self.threshold_number_of_evaluators}
 
-        quantity_dict = {key:value for key, value in quantity_dict.items() if value > threshold}
-        # quantity_dict = OrderedDict(sorted(quantity_dict.items(), key=lambda x: x[1], reverse=True))
+        if self.flag_print_in_console:
+            print('Movie id: | main user: ')
+            print('-----------------------')
+            for key, value in closest_neighbours.items():
+                print("%8s" % key, "%10.5f" % value)
 
-        movie_list_users_dict = {key:value for key, value in movie_list_users_dict.items() if len(value) > threshold}
+        return movie_list_users_dict
 
-        print(movie_list_users_dict)
-        print(quantity_dict)
-
-        return quantity_dict, movie_list_users_dict
-
-    def recommended_movies(self, quantity_dict, movie_list_users_dict, closest_neighbours):
+    def recommended_movies(self, movie_list_users_dict, closest_neighbours):
+        """calculating what movie to recommend by averaging rating of neighbours weighted by their similarity to
+                main user"""
         """from movies_to_recommend() find those movies that satisfy threshold (rating 3.5), those will be recommended,
         influence of rating from every neighbour is weighted by his relevance"""
         movie_to_recommend_dict = OrderedDict()
@@ -295,8 +294,7 @@ class Recommendation:
                     result_dict[movie] = [rating, 1]
 
         # number of user that must hve rated given movie to be result valid
-        threshold = 10
-        result_dict = {key:value for key, value in result_dict.items() if value[1] > threshold}
+        result_dict = {key:value for key, value in result_dict.items() if value[1] > self.threshold_number_of_evaluators_global}
         result_dict = OrderedDict(sorted(result_dict.items(), key=lambda x: x[1], reverse=True))
 
         for res in result_dict:
@@ -313,7 +311,7 @@ class Recommendation:
         # return list(list()), where in inner lists are 0 movieId, 1 movieRating, 2 movieName
         return user_ratings
 
-# administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same, pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
-
+# administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same,
+# pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
 
 # print users rating
