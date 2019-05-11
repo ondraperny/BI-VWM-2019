@@ -8,6 +8,8 @@ def main():
     jiny nez tyhle 4 fce + konstruktor bys nemel potrebovat"""
 
     # prihlaseni uzivatele bude odpovidat vytvoreni classy Recommendation pro toho daneho uzivatele
+    # tento konstruktor ma jeste dalsich 7 parametru(vsechny maji defaultni hodnoty, a jsou popsane v konstruktoru
+    # recommendation classy, tyto parametry se daji menit v administratorskem modulu
     recommend = Algorithm.Recommendation(1)
 
     # vrati list listů s 3 hodnotami [movie_id, movie_name, movie_rating] pro vsechny filmi, ktere uzivatel ohodnotil
