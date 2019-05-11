@@ -19,9 +19,12 @@ class Recommendation:
         # minimal amount of users that must have rated specific movie, so the movie can be recommended when recommending
         # from global best movies (not user specific)
         self.threshold_number_of_evaluators_global = 10
+        # amount of movies that are recommended to user
+        self.number_to_recommend = 5
+        # minimal expected rating that movie must have, so it can be recommended
+        self.threshold_rating = 3.5
 
         self.main_user = user
-
         io = LoadInput.IOClass()
         # dict(tuple(one-title, second-list of genres))
         self.map_movie_name_on_movie_id = OrderedDict()
@@ -29,21 +32,21 @@ class Recommendation:
         self.database = io.load_database()
 
     # TODO
-    def final_recommendation(self, actionId):
+    def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
-        if actionId  == 0:
-            res = self.spearman_similarity()
-            closest_neighbours, distance_neighbours = self.most_similar_users(res)
-            movie_list_users_dict = self.movies_to_recommend(closest_neighbours, distance_neighbours)
-            res = self.recommended_movies(movie_list_users_dict, closest_neighbours)
-        elif actionId == 1:
-            # best in genre recommendation
-            ...
-        elif actionId == 2:
-            # best rated movie overall recommendation
-            ...
+        res = self.spearman_similarity()
+        closest_neighbours = self.most_similar_users(res)
+        movie_list_users_dict = self.movies_to_recommend(closest_neighbours)
+        res = self.recommended_movies(movie_list_users_dict, closest_neighbours)
 
-        return res
+        # if not enough movies to recommend are found, best movies overall will complement up to
+        # "self.number_to_recommend" amount
+        if len(res) < self.number_to_recommend:
+            res.update(self.find_best_rated_movie_overall())
+
+        new_res = {k: res[k] for k in list(res.keys())[:self.number_to_recommend]}
+        # namapovat to na list listu TODO
+        return new_res
 
     @staticmethod
     def print_users_with_same_movies_rated(result):
@@ -197,6 +200,7 @@ class Recommendation:
 
         closest_neighbours = {key: value for key, value in user_spearman_dict.items()
                               if value > self.spearman_coefficient}
+        # currently not used, but can be used for further optimizations
         distant_neighbours = {key: value for key, value in user_spearman_dict.items()
                               if value < (-1 * self.spearman_coefficient)}
 
@@ -205,13 +209,11 @@ class Recommendation:
             print('-----------------------')
             for key, value in closest_neighbours.items():
                 print("%8s" % key, "%10.5f" % value)
-        print(closest_neighbours)
-        print(distant_neighbours)
 
         # dict(user : his relevance to main user)
-        return closest_neighbours, distant_neighbours
+        return closest_neighbours
 
-    def movies_to_recommend(self, closest_neighbours, distant_neighbours):
+    def movies_to_recommend(self, closest_neighbours):
         """find all users """
 
         quantity_dict = OrderedDict()
@@ -243,8 +245,6 @@ class Recommendation:
     def recommended_movies(self, movie_list_users_dict, closest_neighbours):
         """calculating what movie to recommend by averaging rating of neighbours weighted by their similarity to
                 main user"""
-        """from movies_to_recommend() find those movies that satisfy threshold (rating 3.5), those will be recommended,
-        influence of rating from every neighbour is weighted by his relevance"""
         movie_to_recommend_dict = OrderedDict()
 
         for movie, users in movie_list_users_dict.items():
@@ -257,33 +257,20 @@ class Recommendation:
             coefficient = coefficient / weighted_denominator
             movie_to_recommend_dict[movie] = coefficient
 
+        movie_to_recommend_dict = {key: value for key, value in movie_to_recommend_dict.items()
+                                   if value > self.threshold_rating}
         movie_to_recommend_dict = OrderedDict(sorted(movie_to_recommend_dict.items(), key=lambda x: x[1], reverse=True))
-        for movie, coefficient in movie_to_recommend_dict.items():
-            print("Movie: %8s" % movie, "coefficient: %8.5f" % coefficient,
-                  "quantity: %3s" % len(movie_list_users_dict[movie]))
+        # tady jeste nejakej threshold na minimalni rating filmu k doporuceni TODO
 
+        if self.flag_print_in_console:
+            for movie, coefficient in movie_to_recommend_dict.items():
+                print("Movie: %8s" % movie, "coefficient: %8.5f" % coefficient,
+                      "quantity: %3s" % len(movie_list_users_dict[movie]))
+
+        # dict(movie_id : correlation_value)
         return movie_to_recommend_dict
 
-    # SECOND SCENARIO
-    # function from first scenario will suffice(if written properly)
-    # in case we find relevant neighbours but they dont have any relevant same rated movies, we simply choose
-    # best rated movies of closest neighbour(or more of them) with best ratings (mby this will be already
-    # covered in first SCENARIO
-
-    # THIRD SCENARIO
-    def find_user_most_favourite_genre(self):
-        # TODO
-        for movie, rating in self.database[self.main_user]:
-            ...
-
-    def find_most_favourite_movies_in_genre(self):
-        # TODO
-        ...
-
-    # FOURTH SCENARIO
     def find_best_rated_movie_overall(self):
-        # required high rating
-        # TODO
         result_dict = OrderedDict()
         for _, value in self.database.items():
             for movie, rating in value.items():
@@ -293,16 +280,23 @@ class Recommendation:
                 else:
                     result_dict[movie] = [rating, 1]
 
-        # number of user that must hve rated given movie to be result valid
-        result_dict = {key:value for key, value in result_dict.items() if value[1] > self.threshold_number_of_evaluators_global}
+        result_dict = {key: value for key, value in result_dict.items()
+                       if value[1] > self.threshold_number_of_evaluators_global}
+        # TODO tohle a je3t2 vracim bubec to co mam ?
+        movie_to_recommend_dict = {key: value for key, value in movie_to_recommend_dict.items()
+                                   if value > self.threshold_rating}
         result_dict = OrderedDict(sorted(result_dict.items(), key=lambda x: x[1], reverse=True))
 
         for res in result_dict:
-            print("Average rating of", res, "is", result_dict[res][0] / result_dict[res][1], "where",
+            print("Average rating of", res, "is", result_dict[res][0]
+                  / result_dict[res][1], "where",
                   result_dict[res][1], "people rated, with complete rating", result_dict[res][0])
+
+        # dict(movie_id : rating)
         return result_dict
 
-    def print_main_user_ratings(self):
+    def main_user_ratings(self):
+        """return user's movies that he rated, their rating and Id"""
         user_ratings = []
         for movie, rating in self.database[self.main_user].items():
             print(movie, rating, self.map_movie_name_on_movie_id[movie][0])
@@ -311,7 +305,17 @@ class Recommendation:
         # return list(list()), where in inner lists are 0 movieId, 1 movieRating, 2 movieName
         return user_ratings
 
-# administrace uzivatelu, pamatovat si co jsem uz doporucil a nedoporucit to same,
-# pridavani uzivatele do databaze a moznost menit hodnoceni v databazi
+    def all_movies(self):
+        """return all movies and their Id's"""
+        res_dict = OrderedDict()
+        for key, value in self.map_movie_name_on_movie_id.items():
+            res_dict[key] = value[0]
 
-# print users rating
+        if self.flag_print_in_console:
+            print('Movie id: | main user: ')
+            print('-----------------------')
+            for key, value in res_dict.items():
+                print("%8s" % key, "%10.5f" % value)
+
+        # dict(movie_id : movie_name)
+        return res_dict

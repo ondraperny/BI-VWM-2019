@@ -15,7 +15,7 @@ def main():
     # recommend.final_recommendation(0)
 
 
-    # recommend.print_main_user_ratings()
+    # recommend.main_user_ratings()
 
     # recommend.add_genre(genre) prida zanr
     # recommend.final_recommendation(actionId)
