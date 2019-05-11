@@ -4,13 +4,6 @@
     <meta charset="UTF-8"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
         <style>
-        h1 {
-            margin: 10px;
-        }
-
-        h2 {
-            margin: 5px;
-        }
 
         </style>
     <title>Title</title>
@@ -24,7 +17,8 @@
         </ul>
     </nav>
 
-    <h1>Recommended movives</h1>
+    {% block content %}
+    {% endblock %}
 
 </body>
 </html>

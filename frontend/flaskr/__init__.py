@@ -8,6 +8,7 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+        TEMPLATES_AUTO_RELOAD='TRUE',
     )
 
     if test_config is None:
@@ -34,11 +35,11 @@ def create_app(test_config=None):
 
     @app.route('/profile')
     def profile():
-        return render_template("profile.xhtml", films=films)
+        return render_template("profile.html", films=films)
 
     @app.route('/recommend')
     def recommend():
-        return render_template("recommend.xhtml", films=films)
+        return render_template("recommend.html", films=films)
 
     if __name__ == '__main__':
         app.run(debug=True)
