@@ -5,31 +5,34 @@ import LoadInput
 class Recommendation:
     """class containing all methods used for recommending"""
     _ratings = (5.0, 4.5, 4.0, 3.5, 3.0, 2.5, 2.0, 1.5, 1.0, 0.5, 0.0)
+
     # _ratings = (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0)
 
-    def __init__(self, user):
-        # print in console semi-calculations during recommending
-        self.flag_print_in_console = True
-        # cut of users with smaller spearman_coeffiecient(than this given) as irrelevant
-        self.spearman_coefficient = 0.5
+    def __init__(self, user, flag_print_in_console=False, spearman_coefficient=0.5, min_same_rated_movies=5,
+                 threshold_number_of_evaluators=3, threshold_number_of_evaluators_global=30,
+                 number_to_recommend=5, threshold_rating=3.5):
+        # print in console semi-calculations during recommending - pretty much just for debugging
+        self.flag_print_in_console = flag_print_in_console
+        # cut of users with smaller spearman_coefficient(than this given) as irrelevant
+        self.spearman_coefficient = spearman_coefficient
         # minimal amount of movies that rated both main_user and other_user
-        self.min_same_rated_movies = 5
+        self.min_same_rated_movies = min_same_rated_movies
         # minimal amount of users that must have rated specific movie, so the movie can be recommended
-        self.threshold_number_of_evaluators = 3
+        self.threshold_number_of_evaluators = threshold_number_of_evaluators
         # minimal amount of users that must have rated specific movie, so the movie can be recommended when recommending
         # from global best movies (not user specific)
-        self.threshold_number_of_evaluators_global = 30
-        # amount of movies that are recommended to user
-        self.number_to_recommend = 5
+        self.threshold_number_of_evaluators_global = threshold_number_of_evaluators_global
+        # maximum amount of movies that are recommended to user (can be less if not enought movies satisfy conditions)
+        self.number_to_recommend = number_to_recommend
         # minimal expected rating that movie must have, so it can be recommended
-        self.threshold_rating = 3.5
+        self.threshold_rating = threshold_rating
 
         self.main_user = user
-        io = LoadInput.IOClass()
-        # dict(tuple(one-title, second-list of genres))
+        self.io = LoadInput.IOClass()
+        # dict(movie_id, tuple(one-title, second-list of genres))
         self.map_movie_name_on_movie_id = OrderedDict()
-        self.map_movie_name_on_movie_id = io.load_links()
-        self.database = io.load_database()
+        self.map_movie_name_on_movie_id = self.io.load_links()
+        self.database = self.io.load_database()
 
     def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
@@ -123,8 +126,8 @@ class Recommendation:
                 if rating == other_user_dict[keys[0]]:
                     rating_othr += 1
 
-            x_value = float(((n_main+1) + (n_main+rating_main))/2)
-            y_value = float(((n_other+1) + (n_other+rating_othr))/2)
+            x_value = float(((n_main + 1) + (n_main + rating_main)) / 2)
+            y_value = float(((n_other + 1) + (n_other + rating_othr)) / 2)
 
             n_main += rating_main
             n_other += rating_othr
@@ -146,7 +149,7 @@ class Recommendation:
         d_squared_vector = []
 
         for (key1, value1), (key2, value2) in zip(rank_x_dict.items(), rank_y_dict.items()):
-            d_squared_vector.append((float(value1) - float(value2))**2)
+            d_squared_vector.append((float(value1) - float(value2)) ** 2)
 
         if self.flag_print_in_console:
             print('Movie id: | main user: ')
@@ -161,7 +164,7 @@ class Recommendation:
         """choose neighbours with most same movies rated(with some maximum threshold of chosen neighbours), and filter
         out those whole number of same rated movies is very low, so not relevant"""
         # here could be possibly other in future added further optimizations
-        new_neighbours = {key:value for key,value in neighbours.items() if value > self.min_same_rated_movies}
+        new_neighbours = {key: value for key, value in neighbours.items() if value > self.min_same_rated_movies}
         return new_neighbours
 
     def spearman_similarity(self):
@@ -322,10 +325,19 @@ class Recommendation:
         # dict(movie_id : movie_name)
         return res_dict
 
-    def change_database(self, user_id, movie_id, new_rating):
-        if user_id in self.database:
-            if movie_id in self.database[user_id]:
-                self.database[user_id][movie_id] = new_rating
+    def change_database(self, movie_id, new_rating):
+        movie_id = str(movie_id)
+        if movie_id not in self.map_movie_name_on_movie_id.keys() or new_rating > 5 or new_rating < 0:
+            return False
+        # movie_id = int(movie_id)
+        if self.main_user in self.database:
+            if movie_id in self.database[self.main_user]:
+                self.database[self.main_user][movie_id] = new_rating
+                self.io.update_rating(self.main_user, movie_id, new_rating)
+            else:
+                self.database[self.main_user][movie_id] = new_rating
+                self.io.add_new_rating(self.main_user, movie_id, new_rating)
         else:
-            ...
-
+            self.database[self.main_user] = {movie_id: new_rating}
+            self.io.add_new_rating(self.main_user, movie_id, new_rating)
+        return True

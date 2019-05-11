@@ -2,6 +2,7 @@ from tempfile import NamedTemporaryFile
 import shutil
 import csv
 import os
+import time
 
 
 class IOClass:
@@ -56,7 +57,7 @@ class IOClass:
     @staticmethod
     def load_links():
         """load links to connect movieId's with real movie names"""
-        with open('./data/movies.csv', mode='r', encoding="utf8") as csv_file:
+        with open('./data/movies.csv', mode='r') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             line_count = 0
 
@@ -70,7 +71,7 @@ class IOClass:
 
     @staticmethod
     def update_rating(user_id, movie_id, new_rating):
-        filename = './data/movies.csv'
+        filename = './data/ratings.csv'
         tempfile = NamedTemporaryFile(mode='w', delete=False)
 
         fields = ['userId', 'movieId', 'rating', 'timestamp']
@@ -84,6 +85,7 @@ class IOClass:
                     flag = False
                     print('updating row', row['rating'])
                     row['rating'] = str(new_rating)
+                    row['timestamp'] = int(time.time())
                 row = {'userId': row['userId'], 'movieId': row['movieId'], 'rating': row['rating'],
                        'timestamp': row['timestamp']}
                 writer.writerow(row)
@@ -95,11 +97,9 @@ class IOClass:
 
     @staticmethod
     def add_new_rating(user_id, movie_id, new_rating):
-        # TODO checkovat jestli tam uz neni kdyz ho chci pridat
+        row = [user_id, movie_id, new_rating, int(time.time())]
 
-        row = [user_id, movie_id, new_rating, 0]
-
-        with open('./data/movies.csv', 'a') as csvFile:
+        with open('./data/ratings.csv', 'a') as csvFile:
             writer = csv.writer(csvFile, lineterminator=os.linesep)
             writer.writerow(row)
 

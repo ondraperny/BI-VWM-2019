@@ -1,32 +1,28 @@
-import LoadInput
 import Algorithm
 
 
 def main():
+    """Poznamky k API, vsechno co vracim uz je serazeny jak ma byt, takze staci jen vypsat,
+    argumenty funkci jsou vzdy u kazde funkce napsane,
+    co funkce vraceji vzdy popsano v komentari nad danou funkci,
+    jiny nez tyhle 4 fce + konstruktor bys nemel potrebovat"""
+
     # prihlaseni uzivatele bude odpovidat vytvoreni classy Recommendation pro toho daneho uzivatele
+    recommend = Algorithm.Recommendation(1)
 
-    recommend = Algorithm.Recommendation(3)
-    ## recommend.users_with_same_movies_rated()
-    # main_user_dict, other_user_dict = recommend.common_rated_movies(1)
-    # rank_x_dict, rank_y_dict = recommend.rank_x_and_y(main_user_dict, other_user_dict)
-    # recommend.d_squared(rank_x_dict, rank_y_dict)
-    # recommend.spearman_similarity()
-    # recommend.find_best_rated_movie_overall()
-
-    recommend.final_recommendation()
-
-
+    # vrati list listů s 3 hodnotami [movie_id, movie_name, movie_rating] pro vsechny filmi, ktere uzivatel ohodnotil
     # recommend.main_user_ratings()
 
-    # recommend.add_genre(genre) prida zanr
-    # recommend.final_recommendation()
+    # vrati list listů s 3 hodnotami [movie_id, movie_name, expected_rating], kde expected_rating je cislo vyjadrujici
+    # predpoklad ja by dany uzivatel ohodnotil tento film (urcuje prioritu pro recommendaci)
+    recommend.final_recommendation()
 
+    # vraci dictionary s movie_id a movie_name
+    # recommend.all_movies()
 
-    # io.update_rating(user_id, movie_id, new_rating)
-    # kdyz vrati False, update se nepovedl
-
-    # io.add_new_rating(user_id, movie_id, new_rating)
-    # kdyz vrati False, pridani se nepovedlo
+    # vraci True pokud vstupni argumenty byli vporadku (rating v mezich, existuje zadane movie_id),
+    # pokud vporadku nebyli vraci False
+    # print(recommend.change_database(movie_id, new_rating))
 
 
 if __name__ == "__main__":
