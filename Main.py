@@ -10,18 +10,17 @@ def main():
     # main_user_dict, other_user_dict = recommend.common_rated_movies(1)
     # rank_x_dict, rank_y_dict = recommend.rank_x_and_y(main_user_dict, other_user_dict)
     # recommend.d_squared(rank_x_dict, rank_y_dict)
-    recommend.spearman_similarity()
+    # recommend.spearman_similarity()
+    # recommend.find_best_rated_movie_overall()
 
-    # recommend.final_recommendation(0)
+    recommend.final_recommendation()
 
 
     # recommend.main_user_ratings()
 
     # recommend.add_genre(genre) prida zanr
-    # recommend.final_recommendation(actionId)
-    # TODO domyslet actionId parametr
-    # actionId == 0 ... spearman, actionId == 1 ... vyhledani nejlepsiho filmu v zanru,
-    # actionId == 2 vyhledani globalne nejlepsi film
+    # recommend.final_recommendation()
+
 
     # io.update_rating(user_id, movie_id, new_rating)
     # kdyz vrati False, update se nepovedl

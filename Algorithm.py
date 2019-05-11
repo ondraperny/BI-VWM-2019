@@ -13,12 +13,12 @@ class Recommendation:
         # cut of users with smaller spearman_coeffiecient(than this given) as irrelevant
         self.spearman_coefficient = 0.5
         # minimal amount of movies that rated both main_user and other_user
-        self.min_same_rated_movies = 2
+        self.min_same_rated_movies = 5
         # minimal amount of users that must have rated specific movie, so the movie can be recommended
         self.threshold_number_of_evaluators = 3
         # minimal amount of users that must have rated specific movie, so the movie can be recommended when recommending
         # from global best movies (not user specific)
-        self.threshold_number_of_evaluators_global = 10
+        self.threshold_number_of_evaluators_global = 30
         # amount of movies that are recommended to user
         self.number_to_recommend = 5
         # minimal expected rating that movie must have, so it can be recommended
@@ -31,7 +31,6 @@ class Recommendation:
         self.map_movie_name_on_movie_id = io.load_links()
         self.database = io.load_database()
 
-    # TODO
     def final_recommendation(self):
         """control flow of recommendation functions, choose which scenario will be executed and return final results"""
         res = self.spearman_similarity()
@@ -45,8 +44,12 @@ class Recommendation:
             res.update(self.find_best_rated_movie_overall())
 
         new_res = {k: res[k] for k in list(res.keys())[:self.number_to_recommend]}
-        # namapovat to na list listu TODO
-        return new_res
+
+        final_list = []
+        for movie, rating in new_res.items():
+            print(movie, rating, self.map_movie_name_on_movie_id[movie][0])
+            final_list.append([movie, rating, self.map_movie_name_on_movie_id[movie][0]])
+        return final_list
 
     @staticmethod
     def print_users_with_same_movies_rated(result):
@@ -154,17 +157,11 @@ class Recommendation:
         # list(d_squared_values)
         return d_squared_vector
 
-    # TODO
     def candidate_neightbours(self, neighbours):
         """choose neighbours with most same movies rated(with some maximum threshold of chosen neighbours), and filter
         out those whole number of same rated movies is very low, so not relevant"""
-        # TODO optimalizace odstraneni nerelevantnich sousedu
-
+        # here could be possibly other in future added further optimizations
         new_neighbours = {key:value for key,value in neighbours.items() if value > self.min_same_rated_movies}
-        # for key, value in neighbours.items():
-        #     if value < 3:
-        #         neighbours.pop(key)
-
         return new_neighbours
 
     def spearman_similarity(self):
@@ -201,8 +198,8 @@ class Recommendation:
         closest_neighbours = {key: value for key, value in user_spearman_dict.items()
                               if value > self.spearman_coefficient}
         # currently not used, but can be used for further optimizations
-        distant_neighbours = {key: value for key, value in user_spearman_dict.items()
-                              if value < (-1 * self.spearman_coefficient)}
+        # distant_neighbours = {key: value for key, value in user_spearman_dict.items()
+        #                       if value < (-1 * self.spearman_coefficient)}
 
         if self.flag_print_in_console:
             print('Movie id: | main user: ')
@@ -260,7 +257,6 @@ class Recommendation:
         movie_to_recommend_dict = {key: value for key, value in movie_to_recommend_dict.items()
                                    if value > self.threshold_rating}
         movie_to_recommend_dict = OrderedDict(sorted(movie_to_recommend_dict.items(), key=lambda x: x[1], reverse=True))
-        # tady jeste nejakej threshold na minimalni rating filmu k doporuceni TODO
 
         if self.flag_print_in_console:
             for movie, coefficient in movie_to_recommend_dict.items():
@@ -282,18 +278,24 @@ class Recommendation:
 
         result_dict = {key: value for key, value in result_dict.items()
                        if value[1] > self.threshold_number_of_evaluators_global}
-        # TODO tohle a je3t2 vracim bubec to co mam ?
-        movie_to_recommend_dict = {key: value for key, value in movie_to_recommend_dict.items()
-                                   if value > self.threshold_rating}
-        result_dict = OrderedDict(sorted(result_dict.items(), key=lambda x: x[1], reverse=True))
 
-        for res in result_dict:
-            print("Average rating of", res, "is", result_dict[res][0]
-                  / result_dict[res][1], "where",
-                  result_dict[res][1], "people rated, with complete rating", result_dict[res][0])
+        final_result_dict = OrderedDict()
+        for key, value in result_dict.items():
+            final_result_dict[key] = value[0] / value[1]
+
+        final_result_dict = {key: value for key, value in final_result_dict.items()
+                             if value > self.threshold_rating}
+
+        final_result_dict = OrderedDict(sorted(final_result_dict.items(), key=lambda x: x[1], reverse=True))
+
+        if self.flag_print_in_console:
+            print('Movie id: | main user: ')
+            print('-----------------------')
+            for key, value in final_result_dict.items():
+                print("%8s" % key, "%10.5f" % value)
 
         # dict(movie_id : rating)
-        return result_dict
+        return final_result_dict
 
     def main_user_ratings(self):
         """return user's movies that he rated, their rating and Id"""
@@ -319,3 +321,11 @@ class Recommendation:
 
         # dict(movie_id : movie_name)
         return res_dict
+
+    def change_database(self, user_id, movie_id, new_rating):
+        if user_id in self.database:
+            if movie_id in self.database[user_id]:
+                self.database[user_id][movie_id] = new_rating
+        else:
+            ...
+
