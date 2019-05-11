@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Profile</h1>
+    <h2>Rated movies</h2>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Rating</th>
+        </tr>
+        {% for film in films %}
+        <tr>
+            {% for item in film %}
+                <td> {{ item }} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
