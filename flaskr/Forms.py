@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 
 class MyForm(FlaskForm):
 
-    user = DecimalField('User', validators=[DataRequired()])
+    user = DecimalField('User ID', validators=[DataRequired()])
 
     spearman_coefficient = DecimalField('Spearman coefficient', default=0.5)
 
@@ -18,5 +18,16 @@ class MyForm(FlaskForm):
     number_to_recommend = IntegerField('# of movies to recommend', default=5)
 
     threshold_rating = DecimalField('Threshold # of rating', default=3.5)
+
+    submit = SubmitField("Send")
+
+
+class EditForm(FlaskForm):
+
+    user_id = IntegerField('User ID')
+
+    movie_id = IntegerField('Movie ID')
+
+    new_rating = DecimalField('New Rating')
 
     submit = SubmitField("Send")

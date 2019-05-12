@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Editing ratings</h1>
+    <form method="post" action="">
+        {{ form.hidden_tag() }}
+        <fieldset>
+            <legend>Blemc</legend>
+                <br/>
+            <div>
+                {{ form.user_id.label }}
+                    <br/>
+                {{ form.user_id }}
+            </div>
+                <br/>
+            <div>
+                {{ form.movie_id.label }}
+                    <br/>
+                {{ form.movie_id }}
+            </div>
+                <br/>
+            <div>
+                {{ form.new_rating.label }}
+                    <br/>
+                {{ form.new_rating }}
+            </div>
+                <br/>
+            <div>
+                {{ form.submit }}
+            </div>
+        </fieldset>
+    </form>
+
+{% endblock %}
