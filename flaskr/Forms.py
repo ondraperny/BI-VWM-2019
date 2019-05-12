@@ -1,15 +1,15 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, DecimalField, SubmitField, IntegerField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, NumberRange
 
 
 class MyForm(FlaskForm):
 
-    user = DecimalField('User ID', validators=[DataRequired()])
+    user = DecimalField('User ID', validators=[DataRequired(), NumberRange(min=1, max=610)])
 
-    spearman_coefficient = DecimalField('Spearman coefficient', default=0.5)
+    spearman_coefficient = DecimalField('Spearman coefficient', default=0.5, validators=[NumberRange(min=0, max=1)])
 
-    min_same_rated_movies = IntegerField('Minimum of same movies rated', default=5)
+    min_same_rated_movies = IntegerField('Minimum of same movies rated', default=5, validators=[NumberRange(min=1, max=5000)])
 
     threshold_number_of_evaluators = IntegerField('Threshold # of evaluators', default=3)
 

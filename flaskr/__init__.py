@@ -47,9 +47,6 @@ def home():
     return render_template("home.html", form=form)
 
 
-
-
-
 @app.route('/profile')
 def profile():
     recommend = Algorithm.Recommendation(1)
@@ -67,6 +64,7 @@ def editRating():
             return redirect(url_for('profile'))
 
     return render_template("editRating.html", form=form1)
+
 
 recommend = Algorithm.Recommendation(1)
 films = recommend.main_user_ratings()
