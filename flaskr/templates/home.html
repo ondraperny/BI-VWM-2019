@@ -2,4 +2,60 @@
 
 {% block content %}
     <h1>Home</h1>
+
+    <h2>Admin module</h2>
+
+    <form method="post" action=""  >
+        {{ form.hidden_tag() }}
+        <fieldset>
+            <legend>Blemc</legend>
+                <br/>
+            <div>
+                {{ form.user.label }}
+                    <br/>
+                {{ form.user }}
+            </div>
+                <br/>
+            <div>
+                {{ form.spearman_coefficient.label }}
+                    <br/>
+                {{ form.spearman_coefficient }}
+            </div>
+                <br/>
+            <div>
+                {{ form.min_same_rated_movies.label }}
+                    <br/>
+                {{ form.min_same_rated_movies }}
+            </div>
+                <br/>
+            <div>
+                {{ form.threshold_number_of_evaluators.label }}
+                    <br/>
+                {{ form.threshold_number_of_evaluators }}
+            </div>
+                <br/>
+            <div>
+                {{ form.threshold_number_of_evaluators_global.label }}
+                    <br/>
+                {{ form.threshold_number_of_evaluators_global }}
+            </div>
+                <br/>
+            <div>
+                {{ form.number_to_recommend.label }}
+                    <br/>
+                {{ form.number_to_recommend }}
+            </div>
+                <br/>
+            <div>
+                {{ form.threshold_rating.label }}
+                    <br/>
+                {{ form.threshold_rating }}
+            </div>
+                <br/>
+            <div>
+                {{ form.submit }}
+            </div>
+        </fieldset>
+    </form>
+
 {% endblock %}

@@ -18,6 +18,15 @@
         </ul>
     </nav>
 
+    {% with messeges = get_flashed_messeges %}
+        {% if messeges %}
+            {% for messege in messeges %}
+                <div>{{ messege }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
     {% block content %}
     {% endblock %}
 
