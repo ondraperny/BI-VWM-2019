@@ -15,19 +15,19 @@ class MyForm(FlaskForm):
 
     threshold_number_of_evaluators_global = IntegerField('Threshold # of evaluators (global)', default=30)
 
-    number_to_recommend = IntegerField('# of movies to recommend', default=5)
+    number_to_recommend = IntegerField('# of movies to recommend', default=5, validators=[NumberRange(min=1, max=5000)])
 
-    threshold_rating = DecimalField('Threshold # of rating', default=3.5)
+    threshold_rating = DecimalField('Threshold # of rating', default=3.5, validators=[NumberRange(min=1, max=5)])
 
     submit = SubmitField("Send")
 
 
 class EditForm(FlaskForm):
 
-    user_id = IntegerField('User ID')
+    user_id = IntegerField('User ID', validators=[DataRequired(), NumberRange(min=1, max=610)])
 
-    movie_id = IntegerField('Movie ID')
+    movie_id = IntegerField('Movie ID', validators=[DataRequired(), NumberRange(min=1, max=193609)])
 
-    new_rating = DecimalField('New Rating')
+    new_rating = DecimalField('New Rating', validators=[NumberRange(min=1, max=5)])
 
     submit = SubmitField("Send")
