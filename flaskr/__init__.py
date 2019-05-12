@@ -24,16 +24,23 @@ def home():
     return render_template("home.html")
 
 # testovaci data
+# films = [[1, 'Avatar', 5], [2, 'Gavatar', 4], [3, 'V for Vendeta', 5], [4, 'Thor: Dark Word', 3], [5, 'The Shining', 4]]
 
-
-#films = [[1, 'Avatar', 5], [2, 'Gavatar', 4], [3, 'V for Vendeta', 5], [4, 'Thor: Dark Word', 3], [5, 'The Shining', 4]]
 
 recommend = Algorithm.Recommendation(1)
 films = recommend.main_user_ratings()
 
+
 @app.route('/profile')
 def profile():
     return render_template("profile.html", films=films)
+
+
+allMovies = recommend.all_movies()
+
+@app.route('/movies')
+def movies():
+    return render_template("movies.html", films=allMovies)
 
 
 recommendMovies = recommend.final_recommendation()
@@ -42,6 +49,3 @@ recommendMovies = recommend.final_recommendation()
 @app.route('/recommend')
 def recommend():
     return render_template("recommend.html", films=recommendMovies)
-
-
-

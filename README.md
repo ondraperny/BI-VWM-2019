@@ -14,4 +14,8 @@ Spusteni
     chmod +x ./run.sh
     ./run.sh
     
+nebo
+
+    python3 ./run.py    
+
 Program se spusti v debug modu takže se změny ihned zobrazí (pokud ne tak hard refresh - `SHIFT + R`)
