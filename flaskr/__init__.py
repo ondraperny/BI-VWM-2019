@@ -28,24 +28,29 @@ def home():
         print("nice")
         print(form.user.data)
         userid = form.user.data
-        return redirect(url_for('profile')), userid
+
+        recommend = Algorithm.Recommendation(userid)
+        films = recommend.main_user_ratings()
+        recommendMovies = recommend.final_recommendation()
+        return render_template("profile.html", films=films, recommendMovies=recommendMovies)
+        #return redirect(url_for('profile'))
     else:
         flash(f'not Nice')
         print("not nice")
         userid = 1
-    return render_template("home.html", form=form), userid
+    return render_template("home.html", form=form)
 
 
-#_, y = home()
 recommend = Algorithm.Recommendation(1)
 
 
 films = recommend.main_user_ratings()
+recommendMovies = recommend.final_recommendation()
 
 
 @app.route('/profile')
 def profile():
-    return render_template("profile.html", films=films)
+    return render_template("profile.html", films=films, recommendMovies=recommendMovies)
 
 
 allMovies = recommend.all_movies()
@@ -54,9 +59,6 @@ allMovies = recommend.all_movies()
 @app.route('/movies')
 def movies():
     return render_template("movies.html", films=allMovies)
-
-
-recommendMovies = recommend.final_recommendation()
 
 
 @app.route('/recommend')

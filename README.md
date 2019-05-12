@@ -7,7 +7,11 @@ Instalace pro frontend
     python3 -m venv venv
     ./venv/bin/activate (pripdne chmod +x activate)
     pip install Flask
+    pip install Flask-WTF
     
+pokud pořád bude hlásit chybu `No module named "flask_wtf"` tak jít do nastavení PyCharmu a ručně nainstalovat Flask WTF
+   
+   
 Spusteni
 ---
 

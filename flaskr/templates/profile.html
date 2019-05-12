@@ -2,8 +2,27 @@
 
 {% block content %}
     <h1>Profile</h1>
-    <h2>Rated movies</h2>
 
+<h2>Recommended movies</h2>
+<div>
+        <table>
+        <tr>
+            <th>ID</th>
+            <th>Expected Rating</th>
+            <th>Name</th>
+        </tr>
+        {% for film in recommendMovies %}
+        <tr>
+            {% for item in film %}
+                <td> {{ item }} </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<br/>
+<h2>Rated movies</h2>
+<div >
     <table>
         <tr>
             <th>ID</th>
@@ -18,4 +37,7 @@
         </tr>
         {% endfor %}
     </table>
+</div>
+
+
 {% endblock %}
