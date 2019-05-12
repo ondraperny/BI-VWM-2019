@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import LoadInput
+from flaskr import LoadInput
 
 
 class Recommendation:

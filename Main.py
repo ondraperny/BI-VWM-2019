@@ -1,4 +1,4 @@
-import Algorithm
+from flaskr import Algorithm
 
 
 def main():

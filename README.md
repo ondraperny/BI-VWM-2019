@@ -13,3 +13,5 @@ Spusteni
 
     chmod +x ./run.sh
     ./run.sh
+    
+Program se spusti v debug modu takže se změny ihned zobrazí (pokud ne tak hard refresh - `SHIFT + R`)
