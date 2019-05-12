@@ -46,6 +46,8 @@ class Recommendation:
         if len(res) < self.number_to_recommend:
             res.update(self.find_best_rated_movie_overall())
 
+        if len(res) == 0:
+            return False
         new_res = {k: res[k] for k in list(res.keys())[:self.number_to_recommend]}
 
         final_list = []
