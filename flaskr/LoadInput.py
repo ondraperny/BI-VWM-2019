@@ -57,7 +57,7 @@ class IOClass:
     @staticmethod
     def load_links():
         """load links to connect movieId's with real movie names"""
-        with open('./data/movies.csv', mode='r') as csv_file:
+        with open('./data/movies.csv', mode='r', encoding="utf8") as csv_file:
             csv_reader = csv.DictReader(csv_file)
             line_count = 0
 
