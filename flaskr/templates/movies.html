@@ -9,10 +9,10 @@
             <th>ID</th>
             <th>Name</th>
         </tr>
-        {% for film in films %}
+        {% for movie_id, movie_name in films.items() %}
         <tr>
-            <td> {{ film.movie_id }} </td>
-            <td> {{ film.movie_name }} </td>
+            <td> {{ movie_id }} </td>
+            <td> {{ movie_name }} </td>
         </tr>
         {% endfor %}
     </table>

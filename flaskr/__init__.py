@@ -16,7 +16,8 @@ try:
     os.makedirs(app.instance_path)
 except OSError:
     pass
-recommend = Algorithm.Recommendation(2)
+
+
 # a simple page that says home
 @app.route('/home', methods=['GET', 'POST'])
 @app.route('/', methods=['GET', 'POST'])
@@ -25,15 +26,18 @@ def home():
     if form.validate_on_submit():
         flash(f'Nice')
         print("nice")
-        recommend = Algorithm.Recommendation(form.user.data)
-        return redirect(url_for('profile'))
+        print(form.user.data)
+        userid = form.user.data
+        return redirect(url_for('profile')), userid
     else:
         flash(f'not Nice')
         print("not nice")
-    return render_template("home.html", form=form)
+        userid = 1
+    return render_template("home.html", form=form), userid
 
-# testovaci data
-# films = [[1, 'Avatar', 5], [2, 'Gavatar', 4], [3, 'V for Vendeta', 5], [4, 'Thor: Dark Word', 3], [5, 'The Shining', 4]]
+
+#_, y = home()
+recommend = Algorithm.Recommendation(1)
 
 
 films = recommend.main_user_ratings()
