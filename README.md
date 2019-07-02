@@ -1,6 +1,9 @@
+#BI-VWM-2019
+
 Recommendation system based on collaborative filtering. For correlation was used Spearman correlation coefficient.
 Used dataset is small [MovieLens](http://movielens.org) dataset (with 100 000 records, original has 10 millions).
-Installation for frontend
+
+Installations for frontend
 ---
 
     cd frontend
