@@ -1,6 +1,6 @@
-Semestrální prace k předmětu BI-VWM na téma kolaborativní filtrování. Dataset z MovieLens (http://movielens.org).
-
-Instalace pro frontend
+Recommendation system based on collaborative filtering. For correlation was used Spearman correlation coefficient.
+Used dataset is small [MovieLens](http://movielens.org) dataset (with 100 000 records, original has 10 millions).
+Installation for frontend
 ---
 
     cd frontend
@@ -9,17 +9,16 @@ Instalace pro frontend
     pip install Flask
     pip install Flask-WTF
     
-pokud pořád bude hlásit chybu `No module named "flask_wtf"` tak jít do nastavení PyCharmu a ručně nainstalovat Flask WTF
+in case of error: `No module named "flask_wtf"` install "Flask WTF" through IDE (or other means).
    
-   
-Spusteni
+Run program
 ---
 
     chmod +x ./run.sh
     ./run.sh
     
-nebo
+or
 
     python3 ./run.py    
 
-Program se spusti v debug modu takže se změny ihned zobrazí (pokud ne tak hard refresh - `SHIFT + R`)
+Program will run in debug mode.
