@@ -27,3 +27,11 @@ or
     python3 ./run.py    
 
 Program will run in debug mode.
+
+Web GUI:
+---
+Chosing User and recommend parameters:
+![GUI](data/admin_module.JPG)
+
+Result recommendation for that User:
+![GUI](data/recommend_result.JPG)
