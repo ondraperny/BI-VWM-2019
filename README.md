@@ -1,20 +1,19 @@
-# BI-VWM-2019
+# Python 3 program for collaborative filtering.
 
+This program implements a recommendation system based on collaborative filtering using the Spearman correlation coefficient. The dataset used is a smaller version of the [MovieLens](http://movielens.org) dataset, containing 100,000 records.
 
-Recommendation system based on collaborative filtering. For correlation was used Spearman correlation coefficient.
-Used dataset is small [MovieLens](http://movielens.org) dataset (with 100 000 records, original has 10 millions).
-Backend is written in Python and has webpage GUI frontend made in Flask(python web framework).
+The backend is written in Python and has a webpage GUI frontend created with Flask (a Python web framework).
 
 Installations for frontend
 ---
 
     cd frontend
     python3 -m venv venv
-    ./venv/bin/activate (pripdne chmod +x activate)
+    ./venv/bin/activate (alternatively: chmod +x activate)
     pip install Flask
     pip install Flask-WTF
     
-in case of error: `No module named "flask_wtf"` install "Flask WTF" through IDE (or other means).
+In case of error: `No module named "flask_wtf"` install "Flask WTF" through IDE (or other means).
    
 Run program
 ---
@@ -26,11 +25,11 @@ or
 
     python3 ./run.py    
 
-Program will run in debug mode.
+The program will run in debug mode.
 
 Web GUI:
 ---
-Chosing User and recommend parameters:
+Choosing User and recommend parameters:
 ![GUI](data/admin_module.JPG)
 
 Result recommendation for that User:
